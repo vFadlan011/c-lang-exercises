@@ -1,62 +1,62 @@
 #include <stdio.h>
+#include <stdint.h>
 
 void printBinary(unsigned int bin, int len);
 unsigned int setbits(unsigned int x, int p, int n, unsigned int y);
 
 int main() {
-  printf("CASE 1\nx : 10101010\np : 4\nn : 3\ny : 00000111\nex: 10111110\n");
-  printf("r : ");
-  printBinary(setbits(10101010, 4, 3, 00000111), 8);
-  printf("\n\n");
+  printf("Exercise 2-6 Test Scenarios\n");
+  uint8_t scenarios[10][5] = {
+    {0b10100111, 4, 3, 0b00010110, 0b10111011},
+    {0b11111111, 5, 3, 0b00000000, 0b11000111},
+    {0b10101010, 3, 2, 0b00001111, 0b10101110},
+    {0b01010101, 7, 3, 0b11110000, 0b00010101},
+    {0b00001111, 5, 2, 0b11111111, 0b00111111},
+    {0b00110011, 3, 3, 0b11111111, 0b00111111},
+    {0b11000011, 7, 1, 0b00000000, 0b01000011},
+    {0b10011001, 4, 4, 0b00111100, 0b10011001},
+    {0b00000000, 7, 8, 0b10101010, 0b10101010},
+    {0b11110000, 3, 3, 0b01010101, 0b11111010},
+  };
 
-  printf("CASE 2\nx : 11110000\np : 5\nn : 4\ny : 00001111\nex: 11101111\n");
-  printf("r : ");
-  printBinary(setbits(11110000, 5, 4, 00001111), 8);
-  printf("\n\n");
-
-  printf("CASE 3\nx : 00000000\np : 7\nn : 8\ny : 11111111\nex: 11111111\n");
-  printf("r : ");
-  printBinary(setbits(00000000, 7, 8, 11111111), 8);
-  printf("\n\n");
-
-  printf("CASE 4\nx : 11001100\np : 3\nn : 2\ny : 00000011\nex: 11001011\n");
-  printf("r : ");
-  printBinary(setbits(11001100, 3, 2, 00000011), 8);
-  printf("\n\n");
-
-  printf("CASE 5\nx : 10111101\np : 6\nn : 3\ny : 00000000\nex: 10000101\n");
-  printf("r : ");
-  printBinary(setbits(10111101, 6, 3, 00000000), 8);
-  printf("\n\n");
-
-  printf("CASE 6\nx : 101001110\np : 6\nn : 3\ny : 000101110\nex: 101110110\n");
-  printf("r : ");
-  printBinary(setbits(101001110, 6, 3, 101110110), 9);
-  printf("\n\n");
+  printf("x\t\tp\tn\ty\t\texpect\t\tres\t\tcheck\n");
+  for (int i = 0; i < 9; i++)
+  {
+    uint8_t res = setbits(scenarios[i][0], scenarios[i][1], scenarios[i][2], scenarios[i][3]);
+    printBinary(scenarios[i][0], 8);
+    printf("\t%d\t%d\t", scenarios[i][1], scenarios[i][2]);
+    printBinary(scenarios[i][3], 8);
+    printf("\t");
+    printBinary(scenarios[i][4], 8);
+    printf("\t");
+    printBinary(res, 8);
+    printf("\t%s\n", (res==scenarios[i][4]) ? "PASS" : "FAIL");
+  }
+  
 
   return 0;
 }
 
+unsigned int setbits_incorrect(unsigned int x, int p, int n, unsigned int y) {
+  unsigned int fillA, fillB, maskX, clearedX;
+
+  fillA = y & ~(~0 << n);
+  fillB = fillA << p-1;
+
+  maskX = ~(~1 << (n - 1));
+  clearedX = x & ~(maskX << (p+1-n));
+
+  return clearedX | fillB;
+}
+
 unsigned int setbits(unsigned int x, int p, int n, unsigned int y) {
-  unsigned int maskA, maskB, Xp, Xq, maskX, maskY, maskZ;
+  unsigned int mask, clearedX, localizedY;
 
-  maskA = y & ~(~0 << n);
-  maskB = maskA << (p+1-n);
+  mask = ~(~0 << n);
+  localizedY = (y & mask) << (p+1-n);
+  clearedX = x & ~(mask << (p+1-n));
 
-  printf("\nMaskB\t:");
-  printBinary(maskB, 9);
-
-  maskX = ~(~0 << n) << (p+1-n);
-  Xp = x & maskX;
-  Xq = Xp | maskB;
-
-  printf("\nXA\t:");
-  printBinary(Xp, 9);
-  printf("\nmaskX\t:");
-  printBinary(maskX, 9);
-  printf("\n");
-
-  return Xq;
+  return clearedX | localizedY;
 }
 
 /* printBinary: print given binary by len */
